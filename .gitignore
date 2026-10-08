@@ -1,0 +1,9 @@
+node_modules
+dist
+target
+.secrets
+.ai-key
+.bot-url
+*.log
+.DS_Store
+__MACOSX

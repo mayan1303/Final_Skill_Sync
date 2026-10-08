@@ -1,0 +1,44 @@
+# Render Blueprint: New > Blueprint > pick this repo. Render asks for every "sync: false" value.
+services:
+  # ---------------- Backend (Spring Boot, Docker) ----------------
+  - type: web
+    name: skillsync-backend
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: MONGODB_URI            # paste your MongoDB Atlas connection string
+        sync: false
+      - key: CORS_ORIGIN            # paste your frontend URL, e.g. https://skillsync-frontend.onrender.com (no trailing slash)
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: COOKIE_SAMESITE        # None = frontend and backend on different domains (needs COOKIE_SECURE=true)
+        value: "None"
+      - key: SEED_DEMO              # true = creates demo logins (password Demo@12345). Set false for real users.
+        value: "true"
+      - key: GEMINI_API_KEY         # optional, leave empty to skip AI
+        sync: false
+      - key: ANTHROPIC_API_KEY      # optional
+        sync: false
+
+  # ---------------- Frontend (React/Vite static site) ----------------
+  - type: web
+    name: skillsync-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL           # paste backend URL + /api, e.g. https://skillsync-backend.onrender.com/api
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
